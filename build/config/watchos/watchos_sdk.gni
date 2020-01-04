@@ -1,0 +1,47 @@
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+declare_args() {
+  # SDK path to use. When empty this will use the default SDK based on the
+  # value of use_watchos_simulator.
+  watchos_sdk_path = ""
+
+  # Set to true when targeting a simulator build on watchOS. False means that the
+  # target is for running on the device. The default value is to use the
+  # Simulator except when targeting GYP's Xcode builds (for compat with the
+  # existing GYP build).
+  use_watchos_simulator = true
+
+  # Version of watchOS that we're targeting.
+  watchos_deployment_target = "6.0"
+
+  # The path to the watchOS device SDK.
+  watchos_device_sdk_path = ""
+
+  # The path to the watchOS simulator SDK.
+  watchos_simulator_sdk_path = ""
+}
+
+if (watchos_sdk_path == "") {
+  if (!use_watchos_simulator && watchos_device_sdk_path == "") {
+    _watchos_device_sdk_result =
+        exec_script("watchos_sdk.py", [ "watchos" ], "list lines")
+    watchos_device_sdk_path = _watchos_device_sdk_result[0]
+  }
+
+  if (use_watchos_simulator && watchos_simulator_sdk_path == "") {
+    _watchos_sim_sdk_result =
+        exec_script("watchos_sdk.py", [ "watchsimulator" ], "list lines")
+    watchos_simulator_sdk_path = _watchos_sim_sdk_result[0]
+  }
+
+  # Compute default target.
+  if (use_watchos_simulator) {
+    assert(watchos_simulator_sdk_path != "")
+    watchos_sdk_path = watchos_simulator_sdk_path
+  } else {
+    assert(watchos_device_sdk_path != "")
+    watchos_sdk_path = watchos_device_sdk_path
+  }
+}

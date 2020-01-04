@@ -140,7 +140,7 @@ declare_args() {
 
   # Set to true when compiling with the Clang compiler. Typically this is used
   # to configure warnings.
-  is_clang = current_os == "mac" || current_os == "ios" ||
+  is_clang = current_os == "mac" || current_os == "ios" || current_os == "watchos" ||
              current_os == "linux" || current_os == "chromeos"
 
   # Compile for Address Sanitizer to find memory bugs.
@@ -192,6 +192,7 @@ if (current_os == "win") {
   is_fuchsia = false
   is_fuchsia_host = false
   is_ios = false
+  is_watchos = false
   is_linux = false
   is_mac = false
   is_posix = false
@@ -202,6 +203,7 @@ if (current_os == "win") {
   is_fuchsia = false
   is_fuchsia_host = false
   is_ios = false
+  is_watchos = false
   is_linux = false
   is_mac = true
   is_posix = true
@@ -212,6 +214,7 @@ if (current_os == "win") {
   is_fuchsia = false
   is_fuchsia_host = false
   is_ios = false
+  is_watchos = false
   is_linux = false
   is_mac = false
   is_posix = true
@@ -222,6 +225,7 @@ if (current_os == "win") {
   is_fuchsia = false
   is_fuchsia_host = false
   is_ios = false
+  is_watchos = false
   is_linux = true
   is_mac = false
   is_posix = true
@@ -245,6 +249,18 @@ if (current_os == "win") {
   is_fuchsia = false
   is_fuchsia_host = false
   is_ios = true
+  is_watchos = false
+  is_linux = false
+  is_mac = false
+  is_posix = true
+  is_win = false
+} else if (current_os == "watchos") {
+  is_android = false
+  is_chromeos = false
+  is_fuchsia = false
+  is_fuchsia_host = false
+  is_ios = false
+  is_watchos = true
   is_linux = false
   is_mac = false
   is_posix = true
@@ -513,6 +529,14 @@ if (custom_toolchain != "") {
     set_default_toolchain("//build/toolchain/mac:ios_clang_x64")
   } else {
     set_default_toolchain("//build/toolchain/mac:ios_clang_arm")
+  }
+} else if (is_watchos) {
+  import("//build/config/watchos/watchos_sdk.gni")  # For use_watchos_simulator
+  host_toolchain = "//build/toolchain/mac:clang_$host_cpu"
+  if (use_watchos_simulator) {
+    set_default_toolchain("//build/toolchain/mac:watchos_clang_x64")
+  } else {
+    set_default_toolchain("//build/toolchain/mac:watchos_clang_arm")
   }
 } else if (is_fuchsia) {
   if (host_os == "mac") {
